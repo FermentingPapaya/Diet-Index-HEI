@@ -1,0 +1,307 @@
+##HEI Components
+
+#This is all from the SAS code that uses NDSR data (files 4 and 9) to calculate HEI-2015.  Throughout, I try (as much as makes sense) to keep the new variable names consistent with the variables created in the SAS code)
+
+#toal veggies
+#the syntax I have for SAS indicates that this is divided by 2 (ML says this is because for HEI serving size is half of what NDSR spits out)
+df49$hei_totveg <- (df49$VEG0100+df49$VEG0200+df49$VEG0300+df49$VEG0400+df49$VEG0800+df49$VEG0450+df49$VEG0700+df49$VEG0600+df49$VEG0900+df49$VEG0500)/2
+
+#Greens and beans
+#the syntax I have for SAS indicates that this is divided by 2 (same as above)
+df49$hei_greensbeans<- (df49$VEG0100+df49$VEG0700)/2
+
+#total fruit
+#the syntax I have for SAS indicates that this is divided by 2 (same as above)
+df49$hei_totfruit<- (df49$FRU0100+df49$FRU0200+df49$FRU0300+df49$FRU0400+df49$FRU0500+df49$FRU0600+df49$FRU0700)/2
+
+#Whole Fruit
+#the syntax I have for SAS indicates that this is divided by 2 (same as above)
+df49$hei_wholefruit <- (df49$FRU0300+df49$FRU0400+df49$FRU0500+df49$FRU0600+df49$FRU0700)/2
+
+#whole grains
+df49$hei_wholegrains<- df49$WholeGrains_oz
+
+#Dairy (why does frozen dairy dessert get divided by 3?)
+df49$hei_dairy <- df49$DMF0100+df49$DMR0100+df49$DML0100+df49$DMN0100+df49$DMF0200+df49$DMR0200+df49$DML0200+df49$DML0300+df49$DML0400+df49$DCF0100+df49$DCR0100+df49$DCL0100+df49$DCN0100+df49$DYF0100+df49$DYR0100+df49$DYL0100+df49$DYF0200+df49$DYR0200+df49$DYL0200+df49$DYN0100+	((df49$DOT0100)/3)+df49$DOT0300+df49$DOT0400+df49$DOT0500+df49$DOT0600
+summary(df49$hei_dairy)
+
+
+#total protein
+df49$hei_totproteins <-df49$MRF0100+df49$MRL0100+df49$MRF0200+df49$MRL0200+df49$MRF0300+df49$MRL0300+df49$MRF0400+df49$MRL0400+df49$MCF0200+df49$MCL0200+df49$MRF0500+df49$	MPF0100+df49$MPL0100+df49$MPF0200+df49$MFF0100+df49$MFL0100+df49$MFF0200+df49$MSL0100+df49$MSF0100+df49$MCF0100+df49$MCL0100+df49$MOF0100+df49$MOF0200+df49$MOF0300+df49$MOF0400+df49$MOF0500+df49$MOF0600+df49$MOF0700+(df49$VEG0700*2)#why do legumes count double??
+
+#table(df49$hei_totproteins, df49$TotalProtein)  #the hei total protein is servings.  the output from NDSR is in grams.  That is the reason for this new variable
+
+
+#Plant and Seafood protein
+df49$hei_seafoodplantprot<- (df49$MFF0100+df49$MFL0100+df49$MFF0200+df49$MSL0100+df49$MSF0100+df49$MOF0500+df49$MOF0600+df49$MOF0700+(df49$VEG0700*2)) #why do legumes count double??
+
+
+##Moderation Variables
+
+# SODIUM
+
+df49$hei_sodium <- df49$Sodium_mg/1000
+
+df49$hei_refinedgrains <- df49$RefinedGrains_oz 
+
+df49$hei_addedsugars <- df49$AddedSugars_TotalSugars_g*4
+
+is.numeric(df49$hei_addedsugars)
+
+# Energy
+df49$hei_energy <-df49$kcal/1000
+summary(df49$hei_energy)
+#the SAS code has an if else statement re if kcal = 0.  We do not have any 0 in our data, so I am skipping that step. 
+
+##HEI Adequacy component
+
+#TOTAL VEGETABLES COMPONENT
+df49$xhei_totveg <- df49$hei_totveg/df49$hei_energy
+summary(df49$xhei_totveg)
+
+df49$HEIX1_TOTALVEG <- 5*(df49$xhei_totveg/1.1)
+df49$HEIX1_TOTALVEG <- ifelse(df49$xhei_totveg >=1.1, 5, df49$HEIX1_TOTALVEG) 
+
+summary(df49$HEIX1_TOTALVEG)  
+
+# If the total veg/energy is greater or equal to 1.1, then 5, if it is anything else, then it is that calculation of 5 times the total veg score divided by 1.1. Coding it like this makes it easy for 0=0 without a separate ifelse statement because 5(0/1.1) =0.  This is consistent with the SAS code  
+
+#GREENS AND BEANS COMPONENT
+df49$xhei_greensbeans <- df49$hei_greensbeans/df49$hei_energy
+summary(df49$xhei_greensbeans)
+
+df49$HEIX2_GREEN_AND_BEAN <- 5*(df49$xhei_greensbeans/0.2)
+df49$HEIX2_GREEN_AND_BEAN <- ifelse(df49$xhei_greensbeans >=0.2, 5, df49$HEIX2_GREEN_AND_BEAN) 
+
+summary(df49$HEIX2_GREEN_AND_BEAN)  
+
+#TOTAL FRUITS COMPONENT
+
+df49$xhei_totfruit <- df49$hei_totfruit/df49$hei_energy
+summary(df49$xhei_totfruit)
+
+df49$HEIX3_TOTALFRUIT <- 5*(df49$xhei_totfruit/0.8)
+df49$HEIX3_TOTALFRUIT <- ifelse(df49$xhei_totfruit >=0.8, 5, df49$HEIX3_TOTALFRUIT) 
+
+summary(df49$HEIX3_TOTALFRUIT)  
+
+
+#WHOLE FRUITS COMPONENT
+
+df49$xhei_wholefruit <- df49$hei_wholefruit/df49$hei_energy
+summary(df49$xhei_wholefruit)
+
+df49$HEIX4_WHOLEFRUIT <- 5*(df49$xhei_totfruit/0.4)
+df49$HEIX4_WHOLEFRUIT <- ifelse(df49$xhei_totfruit >=0.4, 5, df49$HEIX4_WHOLEFRUIT) 
+
+summary(df49$HEIX4_WHOLEFRUIT)  
+
+
+#WHOLE GRAIN COMPONENT
+
+df49$xhei_wholegrains <- df49$hei_wholegrains/df49$hei_energy
+summary(df49$xhei_wholegrains)
+
+df49$HEIX5_WHOLEGRAIN <- 10*(df49$xhei_wholegrains/1.5)
+df49$HEIX5_WHOLEGRAIN <- ifelse(df49$xhei_wholegrains >=1.5, 10, df49$HEIX5_WHOLEGRAIN) 
+
+summary(df49$HEIX5_WHOLEGRAIN)  
+
+
+#DAIRY COMPONENT
+
+df49$xhei_dairy <- df49$hei_dairy/df49$hei_energy
+summary(df49$xhei_dairy)
+
+df49$HEIX6_TOTALDAIRY <- 10*(df49$xhei_dairy/1.3)
+df49$HEIX6_TOTALDAIRY <- ifelse(df49$xhei_dairy >=1.3, 10, df49$HEIX6_TOTALDAIRY) 
+
+summary(df49$HEIX6_TOTALDAIRY)  
+
+
+#TOTAL PROTEIN FOODS COMPONENT
+
+df49$xhei_totproteins <- df49$hei_totproteins/df49$hei_energy
+summary(df49$xhei_totproteins)
+
+df49$HEIX7_TOTPROT <- 5*(df49$xhei_totproteins/2.5)
+df49$HEIX7_TOTPROT <- ifelse(df49$xhei_totproteins >=2.5, 5, df49$HEIX7_TOTPROT) 
+
+summary(df49$HEIX7_TOTPROT)  
+
+#these are all really good on the protein.  Double check totprotein calculation. 
+
+
+#SEAFOOD AND PLANT PROTEINS COMPONENT
+
+df49$xhei_seafoodplantprot <- df49$hei_seafoodplantprot/df49$hei_energy
+summary(df49$xhei_seafoodplantprot)
+
+df49$HEIX8_SEAPLANT_PROT <- 5*(df49$hei_seafoodplantprot/0.8)
+df49$HEIX8_SEAPLANT_PROT <- ifelse(df49$hei_seafoodplantprot >=0.8, 5, df49$HEIX8_SEAPLANT_PROT) 
+
+summary(df49$HEIX8_SEAPLANT_PROT)  
+
+#FAT RATIO
+df49$monopoly <- df49$PFA+df49$MFA
+df49$faratio <- ifelse(df49$SFA > 0,
+                          (df49$monopoly)/df49$SFA,
+                          0)
+df49$HEIX9_FATTYACID <- ifelse(df49$SFA == 0 & df49$monopoly == 0,
+                               10,
+                               NA)
+
+df49$HEIX9_FATTYACID <- ifelse(df49$SFA == 0 & df49$monopoly > 0,
+                               10,
+                               df49$HEIX9_FATTYACID)
+df49$HEIX9_FATTYACID <- ifelse(df49$faratio >= 2.5,
+                               10,
+                               df49$HEIX9_FATTYACID)
+
+df49$HEIX9_FATTYACID <- ifelse(df49$faratio <= 1.2,
+                               0,
+                               df49$HEIX9_FATTYACID)
+
+df49$HEIX9_FATTYACID <- ifelse(is.na(df49$HEIX9_FATTYACID),
+                               10*((df49$faratio-1.2)/(2.5-1.2)),
+                               df49$HEIX9_FATTYACID)
+
+summary(df49$HEIX9_FATTYACID)
+
+#SAS COde: FARMIN=1.2;	FARMAX=2.5; 	if xhei_fatacid=<FARMIN then HEIX9_FATTYACID=0;		else if xhei_fatacid>FARMAX then HEIX9_FATTYACID=10;		else HEIX9_FATTYACID=10*((xhei_fatacid-FARMIN) / (FARMAX-FARMIN));
+
+
+# SODIUM COMPONENT;
+
+df49$xhei_sodium <- df49$hei_sodium/df49$hei_energy
+
+df49$HEIX10_SODIUM <- ifelse(df49$xhei_sodium <= 1.1,
+                          10,
+                          NA)
+df49$HEIX10_SODIUM <- ifelse(df49$xhei_sodium >= 2.0,
+                          0,
+                          df49$HEIX10_SODIUM)
+
+df49$HEIX10_SODIUM <- ifelse(is.na(df49$HEIX10_SODIUM),
+                          10 - (10*(df49$xhei_sodium - 1.1)/(2.0-1.1)),
+                          df49$HEIX10_SODIUM)
+
+summary(df49$xhei_sodium)
+summary(df49$HEIX10_SODIUM)
+
+#xhei_sodium=hei_sodium/energy; 	SODMIN=1.1; 	SODMAX=2.0; 	if xhei_sodium>=SODMAX then HEIX10_SODIUM=0;		else if xhei_sodium=<SODMIN then HEIX10_SODIUM=10;		else HEIX10_SODIUM=10 - (10*((xhei_sodium-SODMIN) / (SODMAX-SODMIN)));
+
+# REFINED GRAIN component
+
+df49$xhei_refinedgrains <- df49$hei_refinedgrains/df49$hei_energy
+
+df49$HEIX11_REFINEDGRAIN <- ifelse(df49$xhei_refinedgrains <= 1.8,
+                              10,
+                              NA)
+df49$HEIX11_REFINEDGRAIN <- ifelse(df49$xhei_refinedgrains >= 4.3,
+                              0,
+                              df49$HEIX11_REFINEDGRAIN)
+
+df49$HEIX11_REFINEDGRAIN <- ifelse(is.na(df49$HEIX11_REFINEDGRAIN),
+                              10 - (10*(df49$xhei_refinedgrains - 1.8)/(4.3-1.8)),
+                              df49$HEIX11_REFINEDGRAIN)
+
+summary(df49$xhei_refinedgrains)
+summary(df49$HEIX11_REFINEDGRAIN)
+
+#SAS CODE: xhei_refinedgrains=hei_refinedgrains/energy; RGMIN=1.8; 	RGMAX=4.3;     if xhei_refinedgrains>=RGMAX then HEIX11_REFINEDGRAIN=0;		else if xhei_refinedgrains=<RGMIN then HEIX11_REFINEDGRAIN=10;		else HEIX11_REFINEDGRAIN=10 - (10*((xhei_refinedgrains-RGMIN) / (RGMAX-RGMIN)));
+
+
+#ADDED SUGARS COMPONENT
+
+df49$xhei_addedsugars <- 100*df49$hei_addedsugars/df49$kcal;
+
+df49$HEIX12_ADDEDSUGARS <- ifelse(df49$xhei_addedsugars <= 6.5,
+                              10,
+                              NA)
+df49$HEIX12_ADDEDSUGARS <- ifelse(df49$xhei_addedsugars >= 26,
+                              0,
+                              df49$HEIX12_ADDEDSUGARS)
+df49$HEIX12_ADDEDSUGARS <- ifelse(is.na(df49$HEIX12_ADDEDSUGARS),
+                              10 - (10*(df49$xhei_addedsugars - 6.5)/(26-6.5)),
+                              df49$HEIX12_ADDEDSUGARS)
+summary(df49$xhei_addedsugars)
+summary(df49$HEIX12_ADDEDSUGARS)
+
+#SAS Code xhei_addedsugars=100*hei_addedsugars/kcal;	ADDSUGMIN=6.5;	ADDSUGMAX=26;	if xhei_addedsugars>=ADDSUGMAX then HEIX12_ADDEDSUGARS=0;		else if xhei_addedsugars<ADDSUGMIN then HEIX12_ADDEDSUGARS=10;		else HEIX12_ADDEDSUGARS=10 - (10*((xhei_addedsugars-ADDSUGMIN) / (ADDSUGMAX-ADDSUGMIN)));
+
+# This is not part of the HEI package on github.  That package has "empty calories" instead of added sugars and saturated fats. 
+
+
+#SATURATED FAT COMPONENT
+df49$xhei_satfats <- df49$ripctSFA
+df49$HEIX13_SATFATS <- ifelse(df49$xhei_satfats <= 8,
+                              10,
+                              NA)
+df49$HEIX13_SATFATS <- ifelse(df49$xhei_satfats >= 16,
+                              0,
+                              df49$HEIX13_SATFATS)
+df49$HEIX13_SATFATS <- ifelse(is.na(df49$HEIX13_SATFATS),
+                              10 - (10*(df49$xhei_satfats - 8)/(16-8)),
+                              df49$HEIX13_SATFATS)
+summary(df49$xhei_satfats)
+summary(df49$HEIX13_SATFATS)
+
+# SAS SATFATSMIN=8; 	SATFATSMAX=16; 	if xhei_satfats>SATFATSMAX then HEIX13_SATFATS=0; 		else if xhei_satfats<SATFATSMIN then HEIX13_SATFATS=10;		else HEIX13_SATFATS=10 - (10*((xhei_satfats-SATFATSMIN) / (SATFATSMAX-SATFATSMIN)));
+
+
+HEI SCORE
+
+df49$HEI2015_Total_Score <- df49$HEIX1_TOTALVEG+ df49$HEIX2_GREEN_AND_BEAN + df49$HEIX3_TOTALFRUIT + df49$HEIX4_WHOLEFRUIT + df49$HEIX5_WHOLEGRAIN + df49$HEIX6_TOTALDAIRY + df49$HEIX7_TOTPROT + df49$HEIX8_SEAPLANT_PROT + df49$HEIX9_FATTYACID + df49$HEIX10_SODIUM + df49$HEIX11_REFINEDGRAIN + df49$HEIX12_ADDEDSUGARS + df49$HEIX13_SATFATS
+
+summary(df49$HEI2015_Total_Score)
+mean(df49$HEI2015_Total_Score) 
+sd(df49$HEI2015_Total_Score)
+
+hist(df49$HEI2015_Total_Score)
+shapiro.test(df49$HEI2015_Total_Score) #normality test
+
+
+# HEI Disctionary
+#hei_totveg='total vegetable servings in cup equivalents'
+#hei_greensbeans='greens and beans servings in cup equivalents'
+#hei_totfruit='total fruit servings in cup equivalents'
+#hei_wholefruit='whole fruit servings in cup equivalents'
+#hei_dairy='dairy servings in cup equivalents'
+#hei_wholegrains='whole grain servings in ounce equivalents'
+#hei_totproteins='total protein servings in ounce equivalents'
+#hei_seafoodplantprot='sea food and plant protein servings in ounce equivalents'
+#hei_refinedgrains='refined grains in ounce equivalents'
+#hei_sodium ='sodium intake in grams'
+#hei_addedsugars='kcal from added sugars'
+	
+#xhei_totfruit='total fruit servings in cup equivalents PER 1000 KCAL'
+#xhei_wholefruit='whole fruit servings in cup equivalents PER 1000 KCAL'
+#xhei_totveg='total vegetable servings in cup equivalents PER 1000 KCAL'
+#xhei_greensbeans='greens and beans servings in cup equivalents PER 1000 KCAL'
+#xhei_wholegrains='whole grain servings in ounce equivalents PER 1000 KCAL'
+#xhei_dairy='dairy servings in cup equivalents PER 1000 KCAL'
+#xhei_totproteins='protein servings in ounce equivalents PER 1000 KCAL'
+#xhei_seafoodplantprot='sea food and plant protein servings in ounce equivalents PER 1000 KCAL'
+#xhei_refinedgrains='refined grains in ounce equivalents PER 1000 KCAL' 
+#xhei_sodium='sodium intake in grams PER 1000 KCAL' 
+#faratio='fatty acid ratio'
+#xhei_addedsugars='percent kcal from added sugars'
+#xhei_satfats='percent saturated fatty acids';
+
+# HEI2015_Total_Score=’TOTAL HEI-2015 SCORE (0-100)’
+#HEIX1_TOTALVEG='HEI-2015 COMPONENT 1 TOTAL VEGETABLES (0-5)'
+#HEIX2_GREEN_AND_BEAN='HEI-2015 COMPONENT 2 GREENS AND BEANS (0-5)'
+# HEIX3_TOTALFRUIT='HEI-2015 COMPONENT 3 TOTAL FRUIT (0-5)'
+# HEIX4_WHOLEFRUIT='HEI-2015 COMPONENT 4 WHOLE FRUIT (0-5)'
+#HEIX5_WHOLEGRAIN='HEI-2015 COMPONENT 5 WHOLE GRAINS (0-10)'
+# HEIX6_TOTALDAIRY='HEI-2015 COMPONENT 6 DAIRY (0-10)'
+#HEIX7_TOTPROT='HEI-2015 COMPONENT 7 TOTAL PROTEIN FOODS (0-5)'
+#HEIX8_SEAPLANT_PROT='HEI-2015 COMPONENT 8 SEAFOOD AND PLANT PROTEIN (0-5)'
+#HEIX9_FATTYACID='HEI-2015 COMPONENT 9 FATTY ACID RATIO (0-10)'
+# HEIX10_SODIUM='HEI-2010 COMPONENT 10 SODIUM (0-10)'
+# HEIX11_REFINEDGRAIN='HEI-2015 COMPONENT 11 REFINED GRAINS (0-10)'
+#HEIX12_ADDEDSUGARS='HEI-2015 COMPONENT 12 ADDED SUGARS (0-10)'
+#HEIX13_SATFATS='HEI-2015 COMPONENT 13 SATURATED FATS (0-10)';
+
+
