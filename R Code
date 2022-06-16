@@ -3,7 +3,7 @@
 #This is all from the SAS code that uses NDSR data (files 4 and 9) to calculate HEI-2015.  Throughout, I try (as much as makes sense) to keep the new variable names consistent with the variables created in the SAS code)
 
 #toal veggies
-#the syntax I have for SAS indicates that this is divided by 2 (ML says this is because for HEI serving size is half of what NDSR spits out)
+#the syntax I have for SAS indicates that this is divided by 2 (HEI serving size is half of what NDSR spits out)
 df49$hei_totveg <- (df49$VEG0100+df49$VEG0200+df49$VEG0300+df49$VEG0400+df49$VEG0800+df49$VEG0450+df49$VEG0700+df49$VEG0600+df49$VEG0900+df49$VEG0500)/2
 
 #Greens and beans
@@ -21,19 +21,19 @@ df49$hei_wholefruit <- (df49$FRU0300+df49$FRU0400+df49$FRU0500+df49$FRU0600+df49
 #whole grains
 df49$hei_wholegrains<- df49$WholeGrains_oz
 
-#Dairy (why does frozen dairy dessert get divided by 3?)
+#Dairy 
 df49$hei_dairy <- df49$DMF0100+df49$DMR0100+df49$DML0100+df49$DMN0100+df49$DMF0200+df49$DMR0200+df49$DML0200+df49$DML0300+df49$DML0400+df49$DCF0100+df49$DCR0100+df49$DCL0100+df49$DCN0100+df49$DYF0100+df49$DYR0100+df49$DYL0100+df49$DYF0200+df49$DYR0200+df49$DYL0200+df49$DYN0100+	((df49$DOT0100)/3)+df49$DOT0300+df49$DOT0400+df49$DOT0500+df49$DOT0600
 summary(df49$hei_dairy)
 
 
 #total protein
-df49$hei_totproteins <-df49$MRF0100+df49$MRL0100+df49$MRF0200+df49$MRL0200+df49$MRF0300+df49$MRL0300+df49$MRF0400+df49$MRL0400+df49$MCF0200+df49$MCL0200+df49$MRF0500+df49$	MPF0100+df49$MPL0100+df49$MPF0200+df49$MFF0100+df49$MFL0100+df49$MFF0200+df49$MSL0100+df49$MSF0100+df49$MCF0100+df49$MCL0100+df49$MOF0100+df49$MOF0200+df49$MOF0300+df49$MOF0400+df49$MOF0500+df49$MOF0600+df49$MOF0700+(df49$VEG0700*2)#why do legumes count double??
+df49$hei_totproteins <-df49$MRF0100+df49$MRL0100+df49$MRF0200+df49$MRL0200+df49$MRF0300+df49$MRL0300+df49$MRF0400+df49$MRL0400+df49$MCF0200+df49$MCL0200+df49$MRF0500+df49$	MPF0100+df49$MPL0100+df49$MPF0200+df49$MFF0100+df49$MFL0100+df49$MFF0200+df49$MSL0100+df49$MSF0100+df49$MCF0100+df49$MCL0100+df49$MOF0100+df49$MOF0200+df49$MOF0300+df49$MOF0400+df49$MOF0500+df49$MOF0600+df49$MOF0700+(df49$VEG0700*2)
 
 #table(df49$hei_totproteins, df49$TotalProtein)  #the hei total protein is servings.  the output from NDSR is in grams.  That is the reason for this new variable
 
 
 #Plant and Seafood protein
-df49$hei_seafoodplantprot<- (df49$MFF0100+df49$MFL0100+df49$MFF0200+df49$MSL0100+df49$MSF0100+df49$MOF0500+df49$MOF0600+df49$MOF0700+(df49$VEG0700*2)) #why do legumes count double??
+df49$hei_seafoodplantprot<- (df49$MFF0100+df49$MFL0100+df49$MFF0200+df49$MSL0100+df49$MSF0100+df49$MOF0500+df49$MOF0600+df49$MOF0700+(df49$VEG0700*2)) 
 
 
 ##Moderation Variables
